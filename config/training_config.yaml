@@ -1,0 +1,330 @@
+# ============================================================================
+# Combat Racing Championship - Training Configuration
+# ============================================================================
+# Training pipeline and experiment settings
+# ============================================================================
+
+# Experiment Settings
+# ============================================================================
+experiment:
+  name: "combat_racing_experiment"
+  description: "Training combat racing agents with RL"
+  tags: ["dqn", "racing", "combat"]
+  notes: ""
+  
+  # Logging
+  log_dir: "experiments/results"
+  log_frequency: 10  # Episodes
+  save_frequency: 100  # Episodes
+  
+  # Checkpointing
+  checkpoint_dir: "experiments/results/models"
+  keep_checkpoints: 5  # Number of recent checkpoints to keep
+  save_best_only: false
+  
+  # Experiment tracking
+  use_tensorboard: true
+  use_wandb: false  # Set to true if using W&B
+  use_mlflow: false
+  
+  # W&B settings (if enabled)
+  wandb:
+    project: "combat-racing-rl"
+    entity: null  # Your W&B username
+    group: null
+    job_type: "train"
+
+# Training Settings
+# ============================================================================
+training:
+  # Algorithm selection
+  algorithm: "dqn"  # "qlearning", "dqn", "ppo"
+  
+  # Training duration
+  total_episodes: 2000
+  max_steps_per_episode: 5000
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 200  # Episodes
+    min_improvement: 0.01
+    metric: "mean_reward"
+    
+  # Validation
+  validation:
+    enabled: true
+    frequency: 50  # Episodes
+    episodes: 20
+    
+  # Training speed
+  render_during_training: false
+  render_frequency: 100  # Episodes (if enabled)
+  training_speed_multiplier: 10.0  # Speed up physics
+  
+  # Multi-processing
+  num_workers: 1  # Parallel environments
+  async_training: false
+
+# Environment Settings
+# ============================================================================
+environment:
+  # Track
+  track_name: "medium"
+  random_track: false
+  track_rotation: false
+  
+  # Agents
+  num_agents: 4
+  agent_personalities: ["balanced", "aggressive", "defensive", "racer"]
+  
+  # Game rules
+  enable_combat: true
+  enable_powerups: true
+  friendly_fire: false
+  
+  # Episode termination
+  terminate_on_elimination: false
+  terminate_on_timeout: true
+  terminate_on_lap_complete: false
+
+# Reward Shaping
+# ============================================================================
+reward_shaping:
+  # Normalize rewards
+  normalize_rewards: true
+  reward_scale: 0.01
+  
+  # Reward clipping
+  clip_rewards: false
+  reward_clip_range: [-10.0, 10.0]
+  
+  # Custom weights (override defaults)
+  custom_weights:
+    racing_weight: 1.0
+    combat_weight: 0.8
+    survival_weight: 0.5
+
+# Exploration Strategy
+# ============================================================================
+exploration:
+  # Strategy
+  strategy: "epsilon_greedy"  # "epsilon_greedy", "boltzmann", "ucb"
+  
+  # Epsilon-greedy
+  epsilon_schedule: "exponential"  # "linear", "exponential", "constant"
+  
+  # Boltzmann exploration
+  temperature_start: 1.0
+  temperature_end: 0.1
+  temperature_decay: 0.995
+  
+  # UCB exploration
+  ucb_c: 2.0
+
+# Evaluation Settings
+# ============================================================================
+evaluation:
+  # Frequency
+  eval_frequency: 100  # Episodes
+  eval_episodes: 50
+  
+  # Metrics
+  metrics:
+    - "mean_reward"
+    - "success_rate"
+    - "lap_time"
+    - "win_rate"
+    - "kill_death_ratio"
+    - "powerup_efficiency"
+    
+  # Evaluation opponents
+  eval_opponents: "best"  # "best", "random", "mixed", "self"
+  
+  # Save evaluation videos
+  save_videos: true
+  video_frequency: 10  # Evaluations
+  max_videos: 5
+
+# Self-Play Training
+# ============================================================================
+self_play:
+  enabled: true
+  
+  # Opponent pool
+  pool_size: 10
+  pool_init_strategy: "random"  # "random", "copy", "pretrained"
+  update_frequency: 50  # Episodes
+  
+  # Pool management
+  replacement_strategy: "worst"  # "worst", "random", "oldest"
+  keep_best: true
+  diversity_bonus: 0.1
+  
+  # Matchmaking
+  matchmaking: "skill_based"  # "random", "skill_based", "diverse"
+  elo_enabled: true
+  initial_elo: 1500
+
+# Model Saving
+# ============================================================================
+saving:
+  # Save triggers
+  save_best: true
+  save_frequency: 100  # Episodes
+  save_final: true
+  
+  # What to save
+  save_optimizer: true
+  save_replay_buffer: false
+  save_config: true
+  save_metrics: true
+  
+  # Compression
+  compress: false
+
+# Model Loading
+# ============================================================================
+loading:
+  # Resume training
+  resume_training: false
+  resume_path: null
+  
+  # Load weights only
+  load_weights_only: false
+  weights_path: null
+  
+  # Strict loading
+  strict_loading: true
+
+# Performance Optimization
+# ============================================================================
+optimization:
+  # Mixed precision training
+  use_mixed_precision: false
+  
+  # Gradient accumulation
+  gradient_accumulation_steps: 1
+  
+  # Distributed training
+  distributed: false
+  backend: "nccl"  # "nccl", "gloo"
+  
+  # Memory optimization
+  memory_efficient: false
+  offload_to_cpu: false
+
+# Debugging
+# ============================================================================
+debugging:
+  # Debug mode
+  debug_mode: false
+  
+  # Assertions
+  enable_assertions: true
+  check_nan: true
+  check_inf: true
+  
+  # Profiling
+  profile_training: false
+  profile_frequency: 1000  # Steps
+  
+  # Visualization during training
+  visualize_states: false
+  visualize_actions: false
+  visualize_rewards: false
+
+# Reproducibility
+# ============================================================================
+reproducibility:
+  # Random seeds
+  seed: 42
+  seed_env: true
+  seed_torch: true
+  seed_numpy: true
+  
+  # Deterministic operations
+  deterministic: false  # May reduce performance
+  benchmark: true  # May reduce reproducibility
+
+# Data Collection
+# ============================================================================
+data_collection:
+  # Save training data
+  save_episodes: false
+  episodes_to_save: 100
+  
+  # Save trajectories
+  save_trajectories: false
+  trajectory_format: "pickle"  # "pickle", "numpy", "hdf5"
+  
+  # Save for imitation learning
+  save_expert_data: false
+  expert_criteria:
+    min_reward: 1000
+    min_success_rate: 0.8
+
+# Analysis
+# ============================================================================
+analysis:
+  # Compute additional metrics
+  compute_value_estimates: false
+  compute_action_distributions: false
+  
+  # Save heatmaps
+  save_position_heatmaps: true
+  heatmap_frequency: 100  # Episodes
+  
+  # Attention visualization
+  save_attention_maps: false
+  attention_frequency: 50
+
+# Callbacks
+# ============================================================================
+callbacks:
+  # Built-in callbacks
+  tensorboard: true
+  checkpoint: true
+  early_stopping: true
+  progress_bar: true
+  
+  # Custom callbacks
+  custom_callbacks: []
+
+# ============================================================================
+# Preset Configurations (Quick Start)
+# ============================================================================
+presets:
+  # Fast training (for testing)
+  fast:
+    total_episodes: 100
+    eval_frequency: 20
+    save_frequency: 50
+    render_during_training: false
+    
+  # Standard training
+  standard:
+    total_episodes: 2000
+    eval_frequency: 100
+    save_frequency: 100
+    render_during_training: false
+    
+  # High-quality training
+  high_quality:
+    total_episodes: 5000
+    eval_frequency: 50
+    save_frequency: 100
+    validation_episodes: 100
+    save_best: true
+    
+  # Debug mode
+  debug:
+    total_episodes: 10
+    max_steps_per_episode: 100
+    eval_frequency: 5
+    debug_mode: true
+    render_during_training: true
+
+# ============================================================================
+# End of Training Configuration
+# ============================================================================

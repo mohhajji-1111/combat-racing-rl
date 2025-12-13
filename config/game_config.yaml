@@ -1,0 +1,262 @@
+# ============================================================================
+# Combat Racing Championship - Game Configuration
+# ============================================================================
+# All game-related parameters and settings
+# ============================================================================
+
+# Display Settings
+# ============================================================================
+display:
+  window_width: 1280
+  window_height: 720
+  fullscreen: false
+  vsync: true
+  fps: 60
+  show_fps: true
+  antialiasing: true
+
+# Game Settings
+# ============================================================================
+game:
+  max_agents: 8
+  min_agents: 2
+  default_agents: 4
+  game_speed: 1.0  # Multiplier for training speed
+  max_episode_length: 5000  # Timesteps
+  laps_per_race: 3
+  respawn_enabled: true
+  respawn_delay: 2.0  # Seconds
+  
+# Physics Settings
+# ============================================================================
+physics:
+  timestep: 0.016667  # 60 FPS
+  gravity: 0.0  # Top-down view
+  friction: 0.95
+  bounce: 0.3
+  max_velocity: 500.0
+  collision_iterations: 10
+  
+# Car Settings
+# ============================================================================
+car:
+  size: [40, 30]  # Width, height in pixels
+  mass: 1.0
+  max_speed: 400.0
+  acceleration: 200.0
+  deceleration: 150.0
+  turn_speed: 180.0  # Degrees per second
+  drift_factor: 0.8
+  handling: 0.9
+  
+  # Health & Combat
+  max_health: 100.0
+  health_regen_rate: 2.0  # HP per second
+  health_regen_delay: 5.0  # Seconds after damage
+  collision_damage: 10.0
+  
+  # Visuals
+  colors:
+    - [255, 0, 0]      # Red
+    - [0, 255, 0]      # Green
+    - [0, 0, 255]      # Blue
+    - [255, 255, 0]    # Yellow
+    - [255, 0, 255]    # Magenta
+    - [0, 255, 255]    # Cyan
+    - [255, 128, 0]    # Orange
+    - [128, 0, 255]    # Purple
+
+# Combat Settings
+# ============================================================================
+combat:
+  enabled: true
+  friendly_fire: false
+  
+  # Weapons
+  weapons:
+    laser:
+      damage: 15.0
+      speed: 600.0
+      cooldown: 0.5
+      ammo_cost: 1
+      max_ammo: 50
+      projectile_lifetime: 2.0
+      
+    missile:
+      damage: 35.0
+      speed: 400.0
+      cooldown: 2.0
+      ammo_cost: 3
+      max_ammo: 20
+      projectile_lifetime: 3.0
+      homing: true
+      homing_strength: 50.0
+      explosion_radius: 60.0
+      
+    mine:
+      damage: 50.0
+      cooldown: 3.0
+      ammo_cost: 2
+      max_ammo: 10
+      lifetime: 10.0
+      trigger_radius: 50.0
+      explosion_radius: 80.0
+  
+  # Starting ammo
+  starting_ammo:
+    laser: 30
+    missile: 10
+    mine: 5
+
+# Power-ups
+# ============================================================================
+powerups:
+  enabled: true
+  spawn_interval: 5.0  # Seconds
+  max_active: 8
+  lifetime: 15.0  # Seconds before disappearing
+  respawn_delay: 3.0
+  
+  types:
+    speed_boost:
+      probability: 0.3
+      duration: 5.0
+      speed_multiplier: 1.5
+      
+    shield:
+      probability: 0.25
+      duration: 8.0
+      damage_reduction: 0.7
+      
+    double_damage:
+      probability: 0.2
+      duration: 6.0
+      damage_multiplier: 2.0
+      
+    ammo_refill:
+      probability: 0.15
+      laser_amount: 20
+      missile_amount: 5
+      mine_amount: 3
+      
+    health_pack:
+      probability: 0.1
+      heal_amount: 50.0
+
+# Track Settings
+# ============================================================================
+track:
+  default_track: "medium"
+  tile_size: 64  # Pixels
+  
+  checkpoints:
+    show_next: true
+    checkpoint_radius: 50.0
+    checkpoint_reward: 10.0
+    
+  walls:
+    thickness: 20.0
+    color: [60, 60, 60]
+    collision_damage: 15.0
+
+# Camera Settings
+# ============================================================================
+camera:
+  mode: "follow"  # "follow", "overview", "free"
+  follow_speed: 0.1  # Smoothing factor
+  zoom: 1.0
+  shake_enabled: true
+  shake_intensity: 5.0
+  shake_duration: 0.3
+
+# Particle Effects
+# ============================================================================
+particles:
+  enabled: true
+  max_particles: 1000
+  
+  explosion:
+    count: 30
+    lifetime: 1.0
+    size: [5, 15]
+    colors:
+      - [255, 100, 0]
+      - [255, 200, 0]
+      - [255, 50, 0]
+      
+  boost_trail:
+    count: 5
+    lifetime: 0.5
+    size: [3, 8]
+    colors:
+      - [0, 200, 255]
+      - [0, 150, 255]
+      
+  damage_sparks:
+    count: 10
+    lifetime: 0.3
+    size: [2, 5]
+    colors:
+      - [255, 255, 0]
+      - [255, 200, 0]
+
+# Audio Settings
+# ============================================================================
+audio:
+  enabled: true
+  master_volume: 0.7
+  music_volume: 0.5
+  sfx_volume: 0.8
+  
+  sounds:
+    engine: true
+    collision: true
+    weapon: true
+    powerup: true
+    explosion: true
+
+# UI Settings
+# ============================================================================
+ui:
+  show_hud: true
+  show_minimap: true
+  show_leaderboard: true
+  show_kill_feed: true
+  
+  minimap:
+    size: [200, 200]
+    position: [1060, 20]  # Top-right
+    opacity: 0.8
+    
+  hud:
+    font_size: 24
+    font_color: [255, 255, 255]
+    
+  leaderboard:
+    size: [300, 200]
+    position: [20, 20]  # Top-left
+    max_entries: 8
+
+# Replay Settings
+# ============================================================================
+replay:
+  enabled: true
+  buffer_size: 3000  # Frames to keep
+  save_best: true
+  save_interval: 100  # Episodes
+  video_fps: 60
+  video_quality: "high"  # "low", "medium", "high"
+
+# Debug Settings
+# ============================================================================
+debug:
+  show_collision_shapes: false
+  show_velocities: false
+  show_states: false
+  show_q_values: false
+  show_attention: false
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+
+# ============================================================================
+# End of Game Configuration
+# ============================================================================

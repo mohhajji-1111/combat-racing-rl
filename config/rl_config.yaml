@@ -1,0 +1,368 @@
+# ============================================================================
+# Combat Racing Championship - Reinforcement Learning Configuration
+# ============================================================================
+# Hyperparameters for all RL algorithms
+# ============================================================================
+
+# General RL Settings
+# ============================================================================
+general:
+  seed: 42
+  device: "auto"  # "auto", "cpu", "cuda", "mps"
+  num_parallel_envs: 1
+  gamma: 0.99  # Discount factor
+  
+# State Space
+# ============================================================================
+state:
+  # State representation
+  type: "vector"  # "vector", "image", "hybrid"
+  
+  # Vector state components
+  vector_components:
+    - position  # [x, y]
+    - velocity  # [vx, vy]
+    - rotation  # angle
+    - angular_velocity
+    - track_sensors  # Ray distances to walls
+    - checkpoint_direction  # Angle to next checkpoint
+    - checkpoint_distance
+    - health
+    - ammo  # Per weapon type
+    - powerup_status  # Active powerups
+    - opponents  # Relative positions and states
+    
+  # Ray sensors for track perception
+  num_rays: 8
+  ray_length: 200.0
+  ray_angles: [-90, -60, -30, -15, 0, 15, 30, 60, 90]  # Degrees from forward
+  
+  # Opponent perception
+  max_opponents_tracked: 7
+  opponent_visibility_radius: 400.0
+  
+  # Normalization
+  normalize: true
+  clip_values: true
+  clip_range: [-5.0, 5.0]
+
+# Action Space
+# ============================================================================
+action:
+  # Discrete actions for Q-Learning and DQN
+  discrete_actions:
+    - "forward"
+    - "backward"
+    - "left"
+    - "right"
+    - "forward_left"
+    - "forward_right"
+    - "backward_left"
+    - "backward_right"
+    - "shoot_laser"
+    - "shoot_missile"
+    - "drop_mine"
+    - "no_op"
+  
+  # Continuous actions for PPO
+  continuous_actions:
+    steering: [-1.0, 1.0]  # -1 = full left, 1 = full right
+    throttle: [-1.0, 1.0]  # -1 = full brake, 1 = full accelerate
+    shoot: [0.0, 1.0]      # Probability of shooting
+
+# Reward Function
+# ============================================================================
+rewards:
+  # Racing rewards
+  checkpoint_pass: 10.0
+  lap_complete: 100.0
+  race_finish: 500.0
+  position_bonus:  # Multiplier based on position
+    1: 3.0
+    2: 2.0
+    3: 1.5
+    4: 1.2
+    5: 1.0
+  
+  # Speed rewards
+  speed_reward_factor: 0.01  # Per unit of speed
+  min_speed_penalty: -0.5  # Per timestep if too slow
+  
+  # Combat rewards
+  hit_opponent: 30.0
+  eliminate_opponent: 100.0
+  got_hit: -10.0
+  death: -100.0
+  
+  # Power-up rewards
+  collect_powerup: 15.0
+  
+  # Penalty rewards
+  wall_collision: -50.0
+  off_track: -20.0
+  wrong_direction: -5.0
+  timestep_penalty: -0.1  # Efficiency penalty
+  
+  # Shaping rewards
+  checkpoint_progress: 5.0  # Reward for getting closer
+  opponent_proximity: 2.0  # Strategic positioning
+  
+  # Bonus rewards
+  perfect_lap: 200.0  # No collisions
+  combo_bonus: 50.0  # Multiple hits in succession
+
+# ============================================================================
+# Q-Learning Configuration
+# ============================================================================
+qlearning:
+  # Learning parameters
+  learning_rate: 0.1
+  discount_factor: 0.95
+  
+  # Exploration
+  epsilon_start: 1.0
+  epsilon_end: 0.01
+  epsilon_decay: 0.995
+  
+  # State discretization
+  discretization:
+    position: 10  # Grid cells per dimension
+    velocity: 5
+    rotation: 8  # Angles
+    distance_to_checkpoint: 5
+    health: 4
+    
+  # Q-table management
+  max_table_size: 1000000
+  use_hashing: true
+
+# ============================================================================
+# Deep Q-Network (DQN) Configuration
+# ============================================================================
+dqn:
+  # Network architecture
+  network:
+    hidden_layers: [256, 128, 64]
+    activation: "relu"  # "relu", "tanh", "elu"
+    use_layer_norm: false
+    use_batch_norm: false
+    dropout: 0.0
+    
+  # Dueling DQN
+  dueling: true
+  dueling_hidden: 64
+  
+  # Training
+  learning_rate: 0.001
+  optimizer: "adam"  # "adam", "rmsprop", "sgd"
+  weight_decay: 0.0001
+  grad_clip: 10.0
+  
+  # Experience replay
+  replay_buffer_size: 100000
+  batch_size: 64
+  min_buffer_size: 1000
+  
+  # Prioritized experience replay
+  prioritized_replay: true
+  priority_alpha: 0.6
+  priority_beta_start: 0.4
+  priority_beta_end: 1.0
+  priority_beta_frames: 100000
+  
+  # Target network
+  use_target_network: true
+  target_update_frequency: 1000  # Steps
+  soft_update: true
+  tau: 0.005  # Soft update coefficient
+  
+  # Double DQN
+  double_dqn: true
+  
+  # Exploration
+  epsilon_start: 1.0
+  epsilon_end: 0.01
+  epsilon_decay_steps: 50000
+  
+  # Training schedule
+  train_frequency: 4  # Train every N steps
+  gradient_steps: 1
+  
+  # Loss
+  loss_function: "mse"  # "mse", "huber"
+  huber_delta: 1.0
+
+# ============================================================================
+# Proximal Policy Optimization (PPO) Configuration
+# ============================================================================
+ppo:
+  # Network architecture
+  actor:
+    hidden_layers: [256, 128]
+    activation: "tanh"
+    log_std_init: 0.0
+    
+  critic:
+    hidden_layers: [256, 128]
+    activation: "tanh"
+    
+  # Shared features
+  shared_features: false
+  shared_layers: [256]
+  
+  # Training
+  learning_rate: 0.0003
+  optimizer: "adam"
+  weight_decay: 0.0
+  grad_clip: 0.5
+  
+  # PPO-specific
+  clip_epsilon: 0.2
+  clip_value_loss: true
+  value_loss_coef: 0.5
+  entropy_coef: 0.01
+  max_grad_norm: 0.5
+  
+  # GAE (Generalized Advantage Estimation)
+  use_gae: true
+  gae_lambda: 0.95
+  
+  # Training loop
+  n_steps: 2048  # Steps per update
+  n_epochs: 10  # Optimization epochs per update
+  batch_size: 64
+  minibatch_size: 64
+  
+  # Normalize advantages
+  normalize_advantage: true
+  
+  # Value function
+  use_value_clipping: true
+  
+  # Learning rate schedule
+  use_lr_schedule: true
+  lr_schedule: "linear"  # "linear", "cosine", "constant"
+
+# ============================================================================
+# Multi-Agent Settings
+# ============================================================================
+multi_agent:
+  # Self-play
+  self_play: true
+  opponent_pool_size: 10
+  opponent_sample_prob: 0.5
+  update_pool_frequency: 50  # Episodes
+  
+  # Population-based training
+  population_size: 8
+  mutation_rate: 0.1
+  crossover_rate: 0.3
+  
+  # Agent personalities
+  personalities:
+    aggressive:
+      combat_weight: 1.5
+      racing_weight: 0.8
+      risk_tolerance: 0.8
+      
+    defensive:
+      combat_weight: 0.7
+      racing_weight: 1.3
+      risk_tolerance: 0.3
+      
+    balanced:
+      combat_weight: 1.0
+      racing_weight: 1.0
+      risk_tolerance: 0.5
+      
+    racer:
+      combat_weight: 0.3
+      racing_weight: 1.7
+      risk_tolerance: 0.6
+
+# ============================================================================
+# Curriculum Learning
+# ============================================================================
+curriculum:
+  enabled: true
+  
+  stages:
+    - name: "basic_driving"
+      episodes: 300
+      settings:
+        combat_enabled: false
+        opponents: 0
+        track_difficulty: "easy"
+        max_speed: 200.0
+        
+    - name: "racing"
+      episodes: 500
+      settings:
+        combat_enabled: false
+        opponents: 2
+        track_difficulty: "medium"
+        max_speed: 300.0
+        
+    - name: "basic_combat"
+      episodes: 400
+      settings:
+        combat_enabled: true
+        opponents: 1
+        track_difficulty: "easy"
+        max_speed: 300.0
+        limited_ammo: false
+        
+    - name: "full_game"
+      episodes: 1000
+      settings:
+        combat_enabled: true
+        opponents: 3
+        track_difficulty: "hard"
+        max_speed: 400.0
+
+# ============================================================================
+# Advanced Features
+# ============================================================================
+advanced:
+  # Attention mechanism
+  attention:
+    enabled: false
+    num_heads: 4
+    key_dim: 64
+    
+  # Curiosity-driven exploration
+  curiosity:
+    enabled: false
+    intrinsic_reward_coef: 0.01
+    forward_model_lr: 0.001
+    
+  # Hindsight Experience Replay
+  her:
+    enabled: false
+    strategy: "future"  # "future", "episode", "final"
+    k: 4  # Number of additional goals
+    
+  # Imitation learning
+  imitation:
+    enabled: false
+    expert_data_path: null
+    bc_loss_coef: 0.1
+
+# ============================================================================
+# Transfer Learning
+# ============================================================================
+transfer:
+  # Load pre-trained model
+  load_model: false
+  model_path: null
+  
+  # Freeze layers
+  freeze_layers: []
+  
+  # Fine-tuning
+  fine_tune_lr: 0.0001
+  fine_tune_steps: 10000
+
+# ============================================================================
+# End of RL Configuration
+# ============================================================================
